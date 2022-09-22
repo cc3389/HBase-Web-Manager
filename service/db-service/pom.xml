@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>db-service</artifactId>
-
+    <description>统一管理所有的hbase连接，并将配置信息持久化到数据库与缓存中</description>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
