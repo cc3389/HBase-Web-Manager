@@ -29,6 +29,7 @@ public class ConnectionManager {
      */
     public static Connection createConnection(String ip, Configuration config) {
         try {
+
             Connection connection = ConnectionFactory.createConnection(config);
             connectionMap.put(ip,connection);
             // TODO 校验重复put

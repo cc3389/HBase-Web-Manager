@@ -89,6 +89,10 @@
             <artifactId>mysql-connector-java</artifactId>
             <groupId>mysql</groupId>
         </dependency>
-
+        <dependency>
+            <groupId>edu.wit</groupId>
+            <artifactId>common-util</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
