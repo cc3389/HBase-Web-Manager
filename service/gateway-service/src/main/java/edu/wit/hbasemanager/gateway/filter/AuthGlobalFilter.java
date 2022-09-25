@@ -38,7 +38,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             ServerHttpResponse response = exchange.getResponse();
             return out(response, ResultCodeEnum.PERMISSION);
         }
-
+        ServerHttpRequest.Builder mutate = request.mutate();
         //api接口，异步请求，校验用户必须登录
         if(antPathMatcher.match("/api/**/auth/**", path)) {
             Long userId = this.getUserId(request);
@@ -46,8 +46,13 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 ServerHttpResponse response = exchange.getResponse();
                 return out(response, ResultCodeEnum.LOGIN_AUTH);
             }
+            // 将token信息放入header中
+            mutate.header("userId", String.valueOf(userId));
+            mutate.header("email",getEmail(request));
+            mutate.header("role",getRole(request));
         }
-        return chain.filter(exchange);
+        ServerHttpRequest build = mutate.build();
+        return chain.filter(exchange.mutate().request(build).build());
     }
 
     @Override
@@ -82,6 +87,28 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         }
         if(!StringUtils.isEmpty(token)) {
             return JwtHelper.getUserId(token);
+        }
+        return null;
+    }
+    private String getEmail(ServerHttpRequest request) {
+        String token = "";
+        List<String> tokenList = request.getHeaders().get("token");
+        if(null  != tokenList) {
+            token = tokenList.get(0);
+        }
+        if(!StringUtils.isEmpty(token)) {
+            return JwtHelper.getEmail(token);
+        }
+        return null;
+    }
+    private String getRole(ServerHttpRequest request) {
+        String token = "";
+        List<String> tokenList = request.getHeaders().get("token");
+        if(null  != tokenList) {
+            token = tokenList.get(0);
+        }
+        if(!StringUtils.isEmpty(token)) {
+            return JwtHelper.getRole(token);
         }
         return null;
     }
