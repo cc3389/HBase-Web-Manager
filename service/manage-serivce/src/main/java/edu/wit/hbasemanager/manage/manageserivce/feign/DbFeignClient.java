@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(value="db-service")
+@FeignClient(value="db-service",path = "db/connection/inner/")
 @Component
 public interface DbFeignClient {
-    @GetMapping("getConnection/{ip}")
-    Connection getConnection(@PathVariable("ip") String ip);
-    @GetMapping("closeConnection/{ip}")
-    boolean closeConnection(@PathVariable("ip") String ip);
+    @GetMapping("getConnection/{name}")
+    Connection getConnection(@PathVariable("name") String name);
+    @GetMapping("closeConnection/{name}")
+    boolean closeConnection(@PathVariable("name") String name);
     @PostMapping("createConnection")
-    Connection CreateConnection(String ip, Configuration config);
+    Connection CreateConnection(String name, Configuration config);
+
 }

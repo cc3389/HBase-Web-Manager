@@ -6,18 +6,18 @@ import org.apache.hadoop.hbase.client.Connection;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/db")
+@RequestMapping("/db/connection/inner/")
 public class ConnectionController {
-    @GetMapping("getConnection/{ip}")
-    public Connection getConnection(@PathVariable("ip") String ip) {
-        return ConnectionManager.getConnection(ip);
+    @GetMapping("getConnection/{name}")
+    public Connection getConnection(@PathVariable("name") String name) {
+        return ConnectionManager.getConnection(name);
     }
-    @GetMapping("closeConnection/{ip}")
-    public boolean closeConnection(@PathVariable("ip") String ip) {
-        return ConnectionManager.closeConnection(ip);
+    @GetMapping("closeConnection/{name}")
+    public boolean closeConnection(@PathVariable("name") String name) {
+        return ConnectionManager.closeConnection(name);
     }
     @PostMapping("createConnection")
-    public Connection CreateConnection(String ip, Configuration config) {
-        return ConnectionManager.createConnection(ip,config);
+    public Connection CreateConnection(String name, Configuration config) {
+        return ConnectionManager.createConnection(name,config);
     }
 }

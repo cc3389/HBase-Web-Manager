@@ -23,15 +23,15 @@ public class ConnectionManager {
 
     /**
      * 创建Hbase连接，获取连接
-     * @param ip 所连接hbase的目标ip
+     * @param name 连接名
      * @param config hbase连接信息配置
      * @return hbase连接
      */
-    public static Connection createConnection(String ip, Configuration config) {
+    public static Connection createConnection(String name, Configuration config) {
         try {
 
             Connection connection = ConnectionFactory.createConnection(config);
-            connectionMap.put(ip,connection);
+            connectionMap.put(name,connection);
             // TODO 校验重复put
             return connection;
         } catch (IOException e) {
@@ -41,23 +41,23 @@ public class ConnectionManager {
 
     /**
      * 获取连接
-     * @param ip
+     * @param name
      * @return hbase连接
      */
-    public static Connection getConnection(String ip) {
-        return connectionMap.get(ip);
+    public static Connection getConnection(String name) {
+        return connectionMap.get(name);
     }
 
     /**
      *  关闭指定的连接
-     * @param ip 所连接hbase的目标ip
+     * @param name 连接名
      * @return
      */
-    public static boolean closeConnection(String ip) {
-        Connection connection = connectionMap.get(ip);
+    public static boolean closeConnection(String name) {
+        Connection connection = connectionMap.get(name);
         try {
             connection.close();
-            connectionMap.remove(ip);
+            connectionMap.remove(name);
             return true;
         } catch (IOException e) {
             throw new RuntimeException(e);
