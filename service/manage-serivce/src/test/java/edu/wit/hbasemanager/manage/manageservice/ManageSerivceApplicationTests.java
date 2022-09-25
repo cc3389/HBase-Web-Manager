@@ -1,4 +1,4 @@
-package edu.wit.hbasemanager.manage.manageserivce;
+package edu.wit.hbasemanager.manage.manageservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

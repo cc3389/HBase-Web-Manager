@@ -1,4 +1,4 @@
-package edu.wit.hbasemanager.manage.manageserivce.feign;
+package edu.wit.hbasemanager.manage.manageservice.feign;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Connection;

@@ -1,4 +1,4 @@
-package edu.wit.hbasemanager.manage.manageserivce;
+package edu.wit.hbasemanager.manage.manageservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
