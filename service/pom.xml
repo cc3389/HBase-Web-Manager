@@ -21,7 +21,7 @@
         <module>user-service</module>
         <module>mail-service</module>
         <module>gateway-service</module>
-        <module>manage-serivce</module>
+        <module>manage-service</module>
     </modules>
     <dependencies>
 <!--        注册中心-->
