@@ -73,7 +73,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>common-util</module>
-        <module>rabbitmq-util</module>
         <module>model-util</module>
         <module>service</module>
     </modules>

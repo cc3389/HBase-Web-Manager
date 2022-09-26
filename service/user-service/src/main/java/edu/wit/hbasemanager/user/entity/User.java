@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 @Data
 public class User {
-    long userId;
-    String email;
-    boolean admin;
+    private long userId;
+    private String email;
+    private boolean admin;
 }

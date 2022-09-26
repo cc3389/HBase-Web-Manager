@@ -5,21 +5,23 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.wit.hbasemanager.common.jwt.JwtHelper;
 import edu.wit.hbasemanager.model.LoginVo;
+import edu.wit.hbasemanager.model.MailMessage;
 import edu.wit.hbasemanager.user.entity.User;
 import edu.wit.hbasemanager.user.mapper.UserMapper;
-import org.checkerframework.checker.units.qual.A;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     RedisTemplate redisTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     /**
      * 1.查询redis，判断是否正确
@@ -30,7 +32,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public LoginVo LoginService(String email, String code) {
+    public LoginVo loginService(String email, String code) {
         String redisCode = (String)redisTemplate.opsForValue().get(email + ":" + "verify");
         LoginVo loginVo = null;
         if (redisCode==code) {
@@ -46,8 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             // 验证成功，生成token
             String token = JwtHelper.createToken(user.getUserId(), email, user.isAdmin() ? "admin" : "user");
-            redisTemplate.opsForValue().set(email+":"+"token",token);
-            redisTemplate.expire(email+":"+"token",24*60*60*1000, TimeUnit.MILLISECONDS);
+            redisTemplate.opsForValue().set(email+":"+"token",token,24*60*60*1000, TimeUnit.MILLISECONDS);
             loginVo = new LoginVo();
             loginVo.setEmail(email);
             loginVo.setRole(user.isAdmin() ? "admin" : "user");
@@ -59,6 +60,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
 
+
+    }
+
+    @Override
+    public String logoutService(String email) {
+        String token = (String)redisTemplate.opsForValue().getAndDelete(email + ":" + "token");
+        return token;
+    }
+
+    @Override
+    public Boolean blackListService(String mail) {
+        Boolean ban = redisTemplate.opsForValue().setIfAbsent(mail + ":" + "blackList",true);
+        if (!ban) {
+            redisTemplate.opsForValue().getAndDelete(mail + ":" + "blackList");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void sendCodeService(String email, String code) {
+        Boolean setCode = redisTemplate.opsForValue().setIfAbsent(email + ":" + "verify", code,
+                60, TimeUnit.SECONDS);
+        MailMessage mailMessage = new MailMessage();
+        mailMessage.setMail(email);
+        mailMessage.setCode(code);
+        rabbitTemplate.convertAndSend("direct.mail",mailMessage);
 
     }
 }

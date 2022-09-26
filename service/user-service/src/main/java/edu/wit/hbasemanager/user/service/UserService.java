@@ -1,8 +1,11 @@
 package edu.wit.hbasemanager.user.service;
 
 import edu.wit.hbasemanager.model.LoginVo;
-import edu.wit.hbasemanager.user.entity.User;
 
 public interface UserService {
-   LoginVo LoginService(String email, String code);
+   LoginVo loginService(String email, String code);
+   String logoutService(String email);
+   Boolean blackListService(String mail);
+
+   void sendCodeService(String email, String code);
 }
