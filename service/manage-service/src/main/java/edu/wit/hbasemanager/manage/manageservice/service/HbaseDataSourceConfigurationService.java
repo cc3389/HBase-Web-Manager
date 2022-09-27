@@ -12,5 +12,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-09-25
  */
 public interface HbaseDataSourceConfigurationService extends IService<HbaseDataSourceConfiguration> {
-
+    String selectDataNameByDataId(Integer dataId);
+    void insertOne(String sourceName, String ip);
+    Integer selectDataIdByName(String sourceName);
+    void delSourceData(Integer dataId);
 }

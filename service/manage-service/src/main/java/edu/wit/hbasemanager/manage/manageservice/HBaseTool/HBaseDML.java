@@ -1,5 +1,6 @@
 package edu.wit.hbasemanager.manage.manageservice.HBaseTool;
 
+import edu.wit.hbasemanager.model.GetTableVo;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.CompareOperator;
@@ -11,6 +12,8 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author Shawn Yue
@@ -20,15 +23,6 @@ import java.io.IOException;
  * @return
  **/
 public class HBaseDML {
-    public static Connection connection;
-
-    static {
-        try {
-            connection = HBaseConnection.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 插入数据
@@ -40,14 +34,13 @@ public class HBaseDML {
      * @param columnName   列名
      * @param value        值
      */
-    public static void putCell(String namespace, String tableName, String rowKey, String columnFamily, String columnName, String value) throws IOException {
+    public static void putCell(String namespace, String tableName, Integer rowKey, String columnFamily, String columnName, String value, Connection connection) throws IOException {
         // 1. 获取 table
         Table table = connection.getTable(TableName.valueOf(namespace, tableName));
         // 2. 调用相关方法插入数据
         // 2.1 创建 put 对象
         Put put = new Put(Bytes.toBytes(rowKey));
         // 2.2. 给 put 对象添加数据
-
         put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), Bytes.toBytes(value));
         // 2.3 将对象写入对应的方法
         try {
@@ -68,7 +61,7 @@ public class HBaseDML {
      * @param columnFamily 列族名称
      * @param columnName   列名
      */
-    public static void getCells(String namespace, String tableName, String rowKey, String columnFamily, String columnName)
+    public static void getCells(String namespace, String tableName, String rowKey, String columnFamily, String columnName, Connection connection)
             throws IOException {
         // 1. 获取 table
         Table table =
@@ -109,8 +102,14 @@ public class HBaseDML {
      * @param startRow  开始的 row 包含的
      * @param stopRow   结束的 row 不包含
      */
-    public static void scanRows(String namespace, String tableName, String startRow, String stopRow)
+    public static List<GetTableVo> scanRows(String namespace, String tableName, Integer startRow, Integer stopRow, Connection connection)
             throws IOException {
+        if (startRow == null) {
+            startRow = 0;
+        }
+        if (stopRow == null) {
+            stopRow = 10;
+        }
         // 1. 获取 table
         Table table = connection.getTable(TableName.valueOf(namespace, tableName));
         // 2. 创建 scan 对象
@@ -121,27 +120,25 @@ public class HBaseDML {
         scan.withStartRow(Bytes.toBytes(startRow));
         // 默认不包含
         scan.withStopRow(Bytes.toBytes(stopRow));
-        try {
-            // 读取多行数据 获得 scanner
-            ResultScanner scanner = table.getScanner(scan);
-            // result 来记录一行数据 cell 数组
-            // ResultScanner 来记录多行数据 result 的数组
-            for (Result result : scanner) {
-                Cell[] cells = result.rawCells();
-                for (Cell cell : cells) {
-                    System.out.print(new
-                            String(CellUtil.cloneRow(cell)) + "-" + new
-                            String(CellUtil.cloneFamily(cell)) + "-" + new
-                            String(CellUtil.cloneQualifier(cell)) + "-" + new
-                            String(CellUtil.cloneValue(cell)) + "\t");
-                }
-                System.out.println();
+        List<GetTableVo> getTableVos = new ArrayList<GetTableVo>();
+        GetTableVo newOne = new GetTableVo();
+        // 读取多行数据 获得 scanner
+        ResultScanner scanner = table.getScanner(scan);
+        // result 来记录一行数据 cell 数组
+        // ResultScanner 来记录多行数据 result 的数组
+        for (Result result : scanner) {
+            Cell[] cells = result.rawCells();
+            for (Cell cell : cells) {
+                newOne.setRow(new String(CellUtil.cloneRow(cell)));
+                newOne.setFamily(new String(CellUtil.cloneFamily(cell)));
+                newOne.setQualifier(new String(CellUtil.cloneQualifier(cell)));
+                newOne.setValue(new String(CellUtil.cloneValue(cell)));
+                getTableVos.add(newOne);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            // 3. 关闭 table
+            table.close();
         }
-        // 3. 关闭 table
-        table.close();
+        return getTableVos;
     }
 
     /**
@@ -157,7 +154,7 @@ public class HBaseDML {
      * */
     public static void filterScan(String namespace, String tableName,
                                   String startRow, String stopRow, String columnFamily, String
-                                          columnName, String value) throws IOException {
+                                          columnName, String value, Connection connection) throws IOException {
         // 1. 获取 table
         Table table = connection.getTable(TableName.valueOf(namespace, tableName));
         // 2. 创建 scan 对象
@@ -228,11 +225,9 @@ public class HBaseDML {
      * @param nameSpace
      * @param tableName
      * @param rowKey
-     * @param family
-     * @param column
      * @throws IOException
      */
-    public static void deleteColumn(String nameSpace, String tableName, String rowKey, String family, String column) throws IOException {
+    public static void deleteRow(String nameSpace, String tableName, Integer rowKey, Connection connection) throws IOException {
         // 1.获取 table
         Table table = connection.getTable(TableName.valueOf(nameSpace, tableName));
 

@@ -12,5 +12,4 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-09-25
  */
 public interface HbaseUserService extends IService<HbaseUser> {
-
 }

@@ -16,5 +16,4 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HbaseUserServiceImpl extends ServiceImpl<HbaseUserMapper, HbaseUser> implements HbaseUserService {
-
 }

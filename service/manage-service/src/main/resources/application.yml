@@ -1,0 +1,30 @@
+# ????
+server.port=8206
+# ???
+spring.application.name=manage-service
+# ?????dev?test?prod
+spring.profiles.active=dev
+# nacos????
+spring.cloud.nacos.discovery.server-addr=192.168.111.100:8848
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: c123
+    url: jdbc:mysql://localhost:3306/hbasemanager
+  servlet:
+    multipart:
+      max-request-size: 2MB
+      max-file-size: 2MB
+  devtools:
+    restart:
+      enabled: true  #???????
+      additional-paths: src/main/java #????
+      exclude: WEB-INF/**
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+
+

@@ -4,8 +4,11 @@ import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author Shawn Yue
@@ -15,14 +18,6 @@ import java.io.IOException;
  * @return
  **/
 public class HBaseDDL {
-    public static Connection connection;
-    static {
-        try {
-            connection = HBaseConnection.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 //
 //    public static void testView() throws IOException {
 //        Admin admin = connection.getAdmin();
@@ -32,10 +27,50 @@ public class HBaseDDL {
 //        }
 //    }
     /**
+     * @Author Shawn Yue
+     * @Description // 删除命名空间
+     * @Date 15:40 2022/9/27
+     * @Param [namespace, connection]
+     * @return void
+     **/
+    public static void delNamespace(String namespace, Connection connection) throws IOException {
+        Admin admin = connection.getAdmin();
+        admin.deleteNamespace(namespace);
+    }
+    /**
+     * @Author Shawn Yue
+     * @Description // 查询所有命名空间
+     * @Date 19:46 2022/9/26
+     * @Param
+     * @return
+     **/
+    public static String[] getNamespace(Connection connection) throws IOException {
+        Admin admin = connection.getAdmin();
+        return admin.listNamespaces();
+    }
+
+    /**
+     * @Author Shawn Yue
+     * @Description // 根据命名空间查询所有表
+     * @Date 20:47 2022/9/26
+     * @Param
+     * @return
+     **/
+    public static List<String> getTableName(Connection connection, String namespace) throws IOException {
+        Admin admin = connection.getAdmin();
+        TableName[] ans = admin.listTableNamesByNamespace(namespace);
+        List<String> tableNames = new ArrayList<>();
+        for(TableName t : ans){
+            tableNames.add(t.getNameAsString());
+        }
+        return tableNames;
+    }
+
+    /**
      * 创建命名空间
      * @param namespace 命名空间名称
      */
-    public static void createNamespace(String namespace) throws IOException {
+    public static void createNamespace(String namespace, Connection connection) throws IOException {
         // 1. 获取 admin
         // 此处的异常先不要抛出 等待方法写完 再统一进行处理
         // admin 的连接是轻量级的 不是线程安全的 不推荐池化或者缓存这个连接
@@ -67,7 +102,7 @@ public class HBaseDDL {
      * @param tableName 表格名称
      * @return ture 表示存在
      */
-    public static boolean isTableExists(String namespace,String tableName) throws IOException {
+    public static boolean isTableExists(String namespace,String tableName, Connection connection) throws IOException {
         // 1. 获取 admin
         Admin admin = connection.getAdmin();
         // 2. 使用方法判断表格是否存在
@@ -90,14 +125,14 @@ public class HBaseDDL {
      * @param tableName 表格名称
      * @param columnFamilies 列族名称 可以有多个
      */
-    public static void createTable(String namespace , String tableName , String[] columnFamilies) throws IOException {
+    public static void createTable(String namespace , String tableName , String[] columnFamilies, Connection connection) throws IOException {
         // 判断是否有至少一个列族
         if (columnFamilies.length == 0){
             System.out.println("创建表格至少有一个列族");
             return;
         }
         // 判断表格是否存在
-        if (isTableExists(namespace,tableName)){
+        if (isTableExists(namespace,tableName, connection)){
             System.out.println("表格已经存在");
             return;
         }
@@ -133,9 +168,9 @@ public class HBaseDDL {
      * @param columnFamily 列族名称
      * @param version 版本
      */
-    public static void modifyTable(String namespace ,String tableName,String columnFamily,int version) throws IOException {
+    public static void modifyTable(String namespace ,String tableName,String columnFamily,int version, Connection connection) throws IOException {
         // 判断表格是否存在
-        if (!isTableExists(namespace,tableName)){
+        if (!isTableExists(namespace,tableName,connection)){
             System.out.println("表格不存在无法修改");
             return;
         }
@@ -173,10 +208,9 @@ public class HBaseDDL {
      * @param tableName 表格名称
      * @return true 表示删除成功
      */
-    public static boolean deleteTable(String namespace ,String
-            tableName) throws IOException {
+    public static boolean deleteTable(String namespace ,String tableName, Connection connection) throws IOException {
         // 1. 判断表格是否存在
-        if (!isTableExists(namespace,tableName)){
+        if (!isTableExists(namespace,tableName,connection)){
             System.out.println("表格不存在 无法删除");
             return false;
         }
@@ -185,8 +219,7 @@ public class HBaseDDL {
         // 3. 调用相关的方法删除表格
         try {
             // HBase 删除表格之前 一定要先标记表格为不可以
-            TableName tableName1 = TableName.valueOf(namespace,
-                    tableName);
+            TableName tableName1 = TableName.valueOf(namespace, tableName);
             admin.disableTable(tableName1);
             admin.deleteTable(tableName1);
         } catch (IOException e) {
