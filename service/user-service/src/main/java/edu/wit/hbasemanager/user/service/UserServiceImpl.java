@@ -35,7 +35,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public LoginVo loginService(String email, String code) {
         String redisCode = (String)redisTemplate.opsForValue().get(email + ":" + "verify");
         LoginVo loginVo = null;
-        if (redisCode==code) {
+        if (redisCode.equals(code)) {
             Wrapper<User> wrapper = new QueryWrapper<User>().eq("email",email);
             User user = baseMapper.selectOne(wrapper);
             if (user==null) {
