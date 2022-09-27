@@ -84,8 +84,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Boolean setCode = redisTemplate.opsForValue().setIfAbsent(email + ":" + "verify", code,
                 60, TimeUnit.SECONDS);
         MailMessage mailMessage = new MailMessage();
-        mailMessage.setMail(email);
-        mailMessage.setCode(code);
+        mailMessage.setTargetMail(email);
+        mailMessage.setSubject("【HBase管理器】验证码");
+        mailMessage.setMessage("您的验证码是:"+code+"。一分钟之内有效");
         rabbitTemplate.convertAndSend("direct.mail",mailMessage);
 
     }

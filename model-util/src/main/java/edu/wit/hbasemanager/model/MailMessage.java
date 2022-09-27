@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class MailMessage {
-    private String mail;
-    private String code;
+    private String targetMail;
+    private String message;
+    private String subject;
 }

@@ -1,0 +1,7 @@
+server:
+  port: 8081
+spring:
+  mail:
+    host:
+    username: 930243913@qq.com
+    password: hxweehmvmltabbhc
